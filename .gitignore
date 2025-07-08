@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Virtual environments
+bin/
+include/
+lib/
+lib64/
+share/
+pyvenv.cfg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker build artifacts
+*.tar
+*.log
+
+# Workspace data (user's work)
+ai_training_env/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Large model files
+*.pth
+*.pt
+*.h5
+*.ckpt
+*.safetensors
+*.onnx
+
+# Dataset files
+*.csv
+*.json
+*.parquet
+*.feather
+*.pkl
+*.pickle
+
+# Compressed files
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

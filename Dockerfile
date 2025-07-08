@@ -1,50 +1,94 @@
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04 AS builder
+#------------------------------------------------------------
+# Dockerfile: PyTorch + TensorFlow for RTX 40/50 Series GPUs
+# Base: Ubuntu 24.04, CUDA 12.8, Python 3.11
+# Strategy: Use nightly builds with CUDA 12.8 for Blackwell (sm_120) support
+#------------------------------------------------------------
 
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
+
+LABEL maintainer="Dennis Consorte"
+LABEL description="PyTorch and TensorFlow with GPU support for modern NVIDIA GPUs including Blackwell"
+
+# Create workspace
 RUN mkdir /workspace
 WORKDIR /workspace
 
-# Install dependencies
-RUN --mount=target=/var/lib/apt/lists,type=cache,id=apt-lists \
-    --mount=target=/var/cache/apt,type=cache,id=apt-cache \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
+# Install base dependencies
+RUN apt update --fix-missing && \
+    apt install -y --no-install-recommends \
+        software-properties-common \
+        gpg-agent \
+        ca-certificates \
+        wget \
+        curl \
+        git \
+        lsb-release && \
+    apt clean && rm -rf /var/lib/apt/lists/*
+
+# Add deadsnakes PPA for Python 3.11
+RUN add-apt-repository ppa:deadsnakes/ppa -y && \
     apt update && \
-    apt install -y wget software-properties-common lsb-release git python3 python3-venv python3-pip
+    apt install -y --no-install-recommends \
+        python3.11 \
+        python3.11-venv \
+        python3.11-dev \
+        python3.11-distutils \
+        build-essential \
+        pkg-config \
+        libopenblas-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libhdf5-dev && \
+    apt clean && rm -rf /var/lib/apt/lists/*
 
-# Install LLVM/Clang 20
-RUN --mount=target=/var/lib/apt/lists,type=cache,id=apt-lists \
-    --mount=target=/var/cache/apt,type=cache,id=apt-cache \
-    wget -O llvm.sh https://apt.llvm.org/llvm.sh && \
-    chmod +x llvm.sh && \
-    ./llvm.sh 20 all && \
-    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100 && \
-    rm llvm.sh
+# Set Python 3.11 as default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
-# Clone TensorFlow
-RUN git clone https://github.com/tensorflow/tensorflow.git
-WORKDIR /workspace/tensorflow
+# Install pip
+RUN wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && \
+    python3.11 get-pip.py && \
+    rm get-pip.py
 
-# Install Bazelisk (Bazel wrapper)
-RUN wget https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64 -O /usr/bin/bazel && \
-    chmod +x /usr/bin/bazel && \
-    bazel version
-
-# Copy Bazel config
-COPY .tf_configure.bazelrc .
-
-# Build TensorFlow wheel
-RUN --mount=type=cache,target=/root/.cache/bazel,id=bazel-cache \
-    bazel build //tensorflow/tools/pip_package:wheel --repo_env=USE_PYWRAP_RULES=1 --repo_env=WHEEL_NAME=tensorflow --config=cuda --config=cuda_wheel && \
-    cp /workspace/tensorflow/bazel-bin/tensorflow/tools/pip_package/wheel_house/*.whl /workspace
-
-# Set up Python virtual environment and install built wheel
-WORKDIR /workspace
-RUN --mount=target=/root/.cache/pip,type=cache,id=pip-global-cache \
-    python3 -m venv venv && \
-    . venv/bin/activate && \
-    pip install *.whl
-
-ENV VIRTUAL_ENV=/workspace/venv
+# Create virtual environment
+RUN python3.11 -m venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# docker buildx build -t wutzebaer/tensorflow-5090:2 .
-# docker push wutzebaer/tensorflow-5090:2
+# Upgrade pip
+RUN pip install --upgrade pip setuptools wheel
+
+# Set CUDA environment
+ENV CUDA_HOME=/usr/local/cuda-12.8
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+
+# Install PyTorch NIGHTLY with CUDA 12.8 for Blackwell support
+# Using cu128 to match our CUDA runtime version
+RUN pip install --pre torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/nightly/cu128/
+
+# Install TensorFlow nightly
+RUN pip install tf-nightly
+
+# Install additional ML packages
+RUN pip install \
+    numpy \
+    scipy \
+    pandas \
+    matplotlib \
+    seaborn \
+    scikit-learn \
+    jupyter \
+    jupyterlab \
+    tqdm \
+    pillow \
+    h5py \
+    pyyaml \
+    tensorboard
+
+# Copy utilities
+COPY test_gpu.py /workspace/test_gpu.py
+COPY startup.sh /startup.sh
+RUN chmod +x /startup.sh
+
+ENTRYPOINT ["/startup.sh"]

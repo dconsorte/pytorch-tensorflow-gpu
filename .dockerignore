@@ -1,0 +1,48 @@
+# .dockerignore
+
+# Git files
+.git
+.gitignore
+
+# Build artifacts
+*.whl
+*.tar.gz
+*.zip
+
+# Cache directories
+__pycache__
+.pytest_cache
+.mypy_cache
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Old builds
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Scripts not needed in build
+install_docker_and_buildx.sh
+
+# Keep only essential files for COPY commands
