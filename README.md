@@ -23,7 +23,7 @@
 
 ---
 
-## 🎯 Why This Container?
+## Why This Container?
 
 If you've just bought an RTX 5090, RTX 5060, or other Blackwell GPU and discovered that:
 - ❌ PyTorch doesn't work out-of-the-box (kernel errors)
@@ -35,7 +35,7 @@ If you've just bought an RTX 5090, RTX 5060, or other Blackwell GPU and discover
 
 ---
 
-## 🚀 Features
+## Features
 
 - ✅ **RTX 5090 & RTX 5060 Tested** - Fully validated on actual Blackwell hardware
 - ✅ **NVIDIA Blackwell Support** - SM 12.0 architecture with CUDA 12.8
@@ -46,7 +46,7 @@ If you've just bought an RTX 5090, RTX 5060, or other Blackwell GPU and discover
 - ✅ **Ubuntu 24.04 + Python 3.11** - Modern stack for latest hardware
 - ✅ **Jupyter Lab Included** - Start training immediately
 
-## 🎯 Blackwell GPU Support Status
+##  Blackwell GPU Support Status
 
 ### Tested Hardware
 - **RTX 5090** ✅ Fully tested and operational
@@ -64,9 +64,9 @@ If you've just bought an RTX 5090, RTX 5060, or other Blackwell GPU and discover
 
 ---
 
-## 🏃 Quick Start
+## Quick Start
 
-For users with RTX 5090/5060 or other Blackwell GPUs who already have Docker and NVIDIA drivers:
+For users with RTX 50 series (Blackwell) GPUs who already have Docker and NVIDIA drivers:
 
 ```bash
 # Clone the repository
@@ -74,7 +74,7 @@ git clone https://github.com/dconsorte/pytorch-tensorflow-gpu.git
 cd pytorch-tensorflow-gpu
 
 # Create workspace
-mkdir -p ~/ai_training_env
+mkdir -p ~/AI Training
 
 # Build and run
 chmod +x build.sh
@@ -101,7 +101,7 @@ If this command works and shows your GPU, skip to step 2. If not, install driver
 2. Go to **Additional Drivers** tab
 3. Select **NVIDIA driver metapackage from nvidia-driver-570-open (proprietary, tested)**
    - The "open kernel" version is recommended and tested
-   - Version 570 is tested with RTX 50-series
+   - Version 595 is tested with RTX 50-series
 4. Click **Apply Changes** and restart
 
 #### Ubuntu Server/Terminal:
@@ -144,13 +144,13 @@ newgrp docker
 
 ---
 
-## 💾 Installation
+
 
 ### Step 1: Clone the Repository
 
 ```bash
 # Option A: Clone from GitHub
-git clone https://github.com/dconsorte/pytorch-tensorflow-gpu.git
+git clone https://github.com/dragonibaad/pytorch-tensorflow-gpu
 cd pytorch-tensorflow-gpu
 
 # Option B: Download and extract ZIP
@@ -177,7 +177,7 @@ If any of these fail, go back to [Prerequisites](#-prerequisites).
 
 ```bash
 # This is where your projects and data will be stored
-mkdir -p ~/ai_training_env
+mkdir -p ~/AI Training
 ```
 
 ### Step 4: Build and Run
@@ -340,7 +340,7 @@ ls /workspace/mydata.csv
 
 ### Save Your Work
 
-All files in `/workspace` (container) are automatically saved to `~/ai_training_env` (host).
+All files in `/workspace` (container) are automatically saved to `~/AI Training` (host).
 
 ### Use with VS Code
 
@@ -483,10 +483,10 @@ pytorch-tensorflow-gpu/
 
 | Component | Version | Blackwell Optimization |
 |-----------|---------|------------------------|
-| **Ubuntu** | 24.04 LTS | Latest kernel for GPU support |
-| **CUDA** | 12.8.1 | Native Blackwell SM 12.0 |
+| **Ubuntu** | 26.04.1 LTS | Latest kernel for GPU support |
+| **CUDA** | 13.4.3 | Native Blackwell SM 12.0 |
 | **cuDNN** | 9.x | Optimized for Blackwell |
-| **Python** | 3.11 | Virtual environment |
+| **Python** | 3.13 | Virtual environment |
 | **PyTorch** | 2.6.0.dev (nightly) | CUDA 12.8 PTX support |
 | **TensorFlow** | 2.19.0.dev (nightly) | JIT compilation for Blackwell |
 | **Jupyter Lab** | Latest | Pre-configured |

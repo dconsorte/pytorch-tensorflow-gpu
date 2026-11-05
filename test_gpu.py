@@ -3,10 +3,9 @@
 GPU Test Script for TensorFlow and PyTorch
 Tests CUDA availability and GPU compute capabilities
 
-Author: Dennis Consorte
+Author: Muhammad Abad Hussain
 License: MIT
-Website: https://dennisconsorte.com
-GitHub: https://github.com/dconsorte
+GitHub: https://github.com/dragonibaad
 """
 
 import sys
@@ -143,14 +142,14 @@ def test_cuda_compatibility():
     print(f"TensorFlow GPU: {'✅' if tf_gpu else '❌'}")
     
     # Architecture support summary
-    print("\n🏗️ Architecture Support:")
+    print("\n Architecture Support:")
     print("- Ada Lovelace (SM 8.9): RTX 4090, 4080, 4070, 4060")
     print("- Blackwell (SM 12.0): RTX 5090, 5080, 5070, 5060")
 
 if __name__ == "__main__":
-    print("🚀 GPU Test Suite for AI/ML Frameworks")
-    print("   Created by Dennis Consorte")
-    print("   https://dennisconsorte.com | https://github.com/dconsorte")
+    print("GPU Test Suite for AI/ML Frameworks")
+    print("   Created by Muhammad Abad Hussain")
+    print("   https://github.com/dragonibaad")
     print("=" * 60)
     
     test_pytorch()
@@ -158,4 +157,4 @@ if __name__ == "__main__":
     test_nvidia_smi()
     test_cuda_compatibility()
     
-    print("\n✅ Test suite completed!")
+    print("\n Test suite completed!")

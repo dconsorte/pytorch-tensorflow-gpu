@@ -5,7 +5,7 @@
 # TensorFlow: 2.22 built natively for sm_120 (installed last)
 #------------------------------------------------------------
 
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
+FROM nvidia/cuda:13.4.3-cudnn-devel-ubuntu26.04
 
 LABEL maintainer="Muhammad Abad Hussain"
 LABEL description="PyTorch and TensorFlow with GPU support for modern NVIDIA GPUs including Blackwell validated for Ubuntu 26.04.1 LTS WSL2"
@@ -39,14 +39,14 @@ ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Set CUDA environment
-ENV CUDA_HOME=/usr/local/cuda-12.8
-ENV PATH=${CUDA_HOME}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH="${CUDA_HOME}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"
 
-# Install PyTorch stable (CUDA 12.8); torchvision resolves to the matching build
+
 RUN uv pip install --python /opt/venv/bin/python \
-    torch==2.11.0 torchvision \
-    --index-url https://download.pytorch.org/whl/cu128
+    torch \
+    torchvision
 
 # Install additional ML packages
 RUN uv pip install --python /opt/venv/bin/python \
@@ -62,7 +62,12 @@ RUN uv pip install --python /opt/venv/bin/python \
     pillow \
     h5py \
     pyyaml \
-    tensorboard
+    tensorboard \
+    mlflow \
+    dagshub \
+    python-dotenv \
+    dvc \
+    dvc-s3
 
 # Install TensorFlow 2.22 built natively for Blackwell (sm_120), Python 3.13
 # Installed last so its dependencies aren't overwritten by the packages above
@@ -70,7 +75,6 @@ RUN uv pip install --python /opt/venv/bin/python --no-cache \
     "https://github.com/chivitiH/tensorflow-blackwell-python313/releases/download/v2.22.0-selfbuilt/tensorflow-2.22.0.dev0%2Bselfbuilt-cp313-cp313-linux_x86_64.whl"
 
 # Copy utilities
-COPY test_gpu.py /workspace/test_gpu.py
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 

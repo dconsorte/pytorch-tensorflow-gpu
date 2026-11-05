@@ -2,7 +2,6 @@
 
 # Docker and Buildx Installation Script
 # For Ubuntu 20.04+ systems
-# Created by Dennis Consorte - https://dennisconsorte.com
 
 set -e
 
