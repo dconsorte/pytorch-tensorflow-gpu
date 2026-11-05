@@ -7,9 +7,9 @@ echo "🛠️ Building PyTorch + TensorFlow GPU Docker image..."
 echo "📋 Build info:"
 echo "   - Image name: pytorch-tensorflow-gpu"
 echo "   - Container name: PYTORCH_TENSORFLOW_GPU"
-echo "   - CUDA 13.4.3 base"
-echo "   - PyTorch"
-echo "   - TensorFlow nightly"
+echo "   - CUDA 12.4 base"
+echo "   - PyTorch Nightly"
+echo "   - TensorFlow Nightly"
 echo ""
 
 # Check NVIDIA driver

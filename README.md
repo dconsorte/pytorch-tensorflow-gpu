@@ -484,7 +484,7 @@ pytorch-tensorflow-gpu/
 | Component | Version | Blackwell Optimization |
 |-----------|---------|------------------------|
 | **Ubuntu** | 26.04.1 LTS | Latest kernel for GPU support |
-| **CUDA** | 13.4.3 | Native Blackwell SM 12.0 |
+| **CUDA** | 12.8.1 | Native Blackwell SM 12.0 |
 | **cuDNN** | 9.x | Optimized for Blackwell |
 | **Python** | 3.13 | Virtual environment |
 | **PyTorch** | 2.6.0.dev (nightly) | CUDA 12.8 PTX support |
