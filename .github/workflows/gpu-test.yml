@@ -1,0 +1,52 @@
+name: GPU build and test
+
+# Runs on the self-hosted GPU runner. Deliberately NOT triggered by pull_request:
+# fork PRs must never run code on the self-hosted machine. Push events only come
+# from branches in this repository; run manually from the Actions tab otherwise.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - Dockerfile
+      - startup.sh
+      - test_gpu.py
+      - ci/**
+      - .github/workflows/gpu-test.yml
+
+concurrency:
+  group: gpu-test
+  cancel-in-progress: false
+
+jobs:
+  gpu-test:
+    runs-on: self-hosted
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    env:
+      IMAGE: pytorch-tensorflow-gpu:ci-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Host GPU
+        run: nvidia-smi || echo "nvidia-smi not on PATH (Docker GPU access is tested below)"
+
+      - name: Build image
+        id: build
+        run: DOCKER_BUILDKIT=1 docker build --progress=plain -t "$IMAGE" .
+
+      - name: Versions
+        run: |
+          docker run --rm --entrypoint python "$IMAGE" -c "import sys, torch, tensorflow as tf; print('Python', sys.version.split()[0]); print('torch', torch.__version__); print('tensorflow', tf.__version__)"
+
+      - name: Strict GPU check
+        run: docker run --rm -i --gpus all --entrypoint python "$IMAGE" - < ci/gpu_check.py
+
+      - name: Full test suite (informational)
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: docker run --rm --gpus all --entrypoint python "$IMAGE" /workspace/test_gpu.py
+
+      - name: Remove image
+        if: always()
+        run: docker rmi "$IMAGE" || true

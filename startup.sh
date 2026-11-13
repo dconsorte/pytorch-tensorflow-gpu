@@ -16,7 +16,7 @@ python --version 2>&1
 
 # PyTorch Version with nightly info
 echo -n "PyTorch: "
-python -c "import torch; v=torch.__version__; print(f'{v} (nightly)' if '+' in v else v)" 2>/dev/null || echo "Not installed"
+python -c "import torch; v=torch.__version__; print(f'{v} (nightly)' if '.dev' in v else v)" 2>/dev/null || echo "Not installed"
 
 # Check PyTorch CUDA support
 echo -n "PyTorch CUDA: "
@@ -46,7 +46,7 @@ if torch.cuda.is_available():
         cap = torch.cuda.get_device_capability(i)
         if cap[0] == 12:
             print('⚠️  Note: Blackwell GPUs detected (sm_120)')
-            print('   PyTorch support is experimental')
+            print('   Using native sm_120 kernels (PyTorch cu128)')
             print('')
             print('   This container created by Dennis Consorte')
             print('   Licensed under MIT License')
