@@ -39,11 +39,11 @@ If you've just bought an RTX 5090, RTX 5060, or other Blackwell GPU and discover
 
 - ✅ **RTX 5090 & RTX 5060 Tested** - Fully validated on actual Blackwell hardware
 - ✅ **NVIDIA Blackwell Support** - SM 12.0 architecture with CUDA 12.8
-- ✅ **PyTorch Nightly** - Latest builds with experimental Blackwell support
+- ✅ **PyTorch Stable (CUDA 12.8)** - Native Blackwell (sm_120) kernels, no nightly builds needed
 - ✅ **TensorFlow Nightly** - JIT compilation for optimal Blackwell performance
 - ✅ **Multi-GPU Ready** - Mix RTX 50-series with RTX 40-series (4090, 4080, 4070)
 - ✅ **Zero Configuration** - Works out-of-the-box with RTX 5090/5060/5080/5070
-- ✅ **Ubuntu 24.04 + Python 3.11** - Modern stack for latest hardware
+- ✅ **Ubuntu 24.04 + Python 3.13** - Modern stack for latest hardware, Python managed by uv
 - ✅ **Jupyter Lab Included** - Start training immediately
 
 ## 🎯 Blackwell GPU Support Status
@@ -57,7 +57,7 @@ If you've just bought an RTX 5090, RTX 5060, or other Blackwell GPU and discover
 | Framework | Blackwell Support | Status |
 |-----------|------------------|---------|
 | **TensorFlow** | Full support via JIT | ✅ Production ready |
-| **PyTorch** | Experimental (nightly) | 🔄 Functional, awaiting PyTorch 2.7 |
+| **PyTorch** | Native sm_120 kernels (stable cu128) | ✅ Production ready |
 | **CUDA/cuDNN** | Native 12.8 support | ✅ Full compatibility |
 
 > **Note**: First-run TensorFlow operations compile PTX to native Blackwell code (one-time ~30s delay). PyTorch uses pre-compiled kernels where available and falls back to JIT compilation.
@@ -356,10 +356,10 @@ All files in `/workspace` (container) are automatically saved to `~/ai_training_
 ### RTX 5090/5060 Blackwell-Specific Issues
 
 #### PyTorch "no kernel image" Error
-This is expected with RTX 50-series GPUs until PyTorch 2.7:
+The container ships stable PyTorch built for CUDA 12.8, which includes native sm_120 kernels, so this error should not appear. If it does, check which build is installed:
 ```
-# Current workaround - the nightly build helps but isn't perfect
-# Full native support expected in PyTorch 2.7+
+python -c "import torch; print(torch.__version__, torch.cuda.get_arch_list())"
+# Expect a +cu128 version and 'sm_120' in the list
 ```
 
 #### TensorFlow First-Run Compilation
@@ -416,12 +416,15 @@ docker rm PYTORCH_TENSORFLOW_GPU
 
 ### PyTorch Blackwell (RTX 50-series) Issues
 
-PyTorch support for Blackwell is experimental. If you see:
+If you see:
 ```
 no kernel image is available for execution on the device
 ```
 
-This is expected with current PyTorch versions. The nightly builds have the best support, but full Blackwell optimization is coming in PyTorch 2.7+. TensorFlow should work fine (uses JIT compilation).
+PyTorch is probably a build without sm_120 kernels (for example, one installed from the default PyPI index inside the container). Reinstall from the CUDA 12.8 index:
+```
+uv pip install --python /opt/venv/bin/python torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+```
 
 ### Out of Memory Errors
 
@@ -486,15 +489,23 @@ pytorch-tensorflow-gpu/
 | **Ubuntu** | 24.04 LTS | Latest kernel for GPU support |
 | **CUDA** | 12.8.1 | Native Blackwell SM 12.0 |
 | **cuDNN** | 9.x | Optimized for Blackwell |
-| **Python** | 3.11 | Virtual environment |
-| **PyTorch** | 2.6.0.dev (nightly) | CUDA 12.8 PTX support |
-| **TensorFlow** | 2.19.0.dev (nightly) | JIT compilation for Blackwell |
+| **Python** | 3.13 | uv-managed virtual environment |
+| **PyTorch** | 2.11.0 (stable, cu128) | Native SM 12.0 kernels |
+| **TensorFlow** | tf-nightly (latest) | JIT compilation for Blackwell |
 | **Jupyter Lab** | Latest | Pre-configured |
 | **Key Libraries** | Latest | NumPy, Pandas, Matplotlib, scikit-learn |
 
-### Why Nightly Builds?
-- **PyTorch**: Nightly builds include experimental Blackwell kernels not in stable releases
-- **TensorFlow**: Nightly builds have the latest XLA optimizations for new architectures
+### Why These Builds?
+- **PyTorch**: Stable releases built for CUDA 12.8 have included native Blackwell kernels since PyTorch 2.7, so nightly builds are no longer needed. Pin a different version with `--build-arg TORCH_VERSION=... --build-arg TORCHVISION_VERSION=... --build-arg TORCHAUDIO_VERSION=...`.
+- **TensorFlow**: Nightly builds have the latest XLA optimizations for new architectures.
+- **Python 3.13 via uv**: uv installs a standalone Python 3.13, so the image no longer depends on the deadsnakes PPA.
+
+### Using a Custom TensorFlow Wheel
+Some community TensorFlow builds compile sm_120 kernels directly, which can help if XLA compilation fails on your card with the nightly build. Pass the wheel's URL at build time:
+```bash
+docker build --build-arg TF_WHEEL=<wheel-url> -t pytorch-tensorflow-gpu .
+```
+The wheel must be built for Python 3.13 (`cp313`). Third-party wheels are not verified by this project, and some carry non-commercial licenses, so check the source and license before using one.
 
 ---
 
@@ -521,7 +532,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project builds on [@wutzebaer](https://github.com/wutzebaer)'s pioneering work in [tensorflow-5090](https://github.com/wutzebaer/tensorflow-5090), which first enabled TensorFlow on RTX 5090 GPUs. This fork extends that foundation with:
 
-- **Blackwell-Optimized PyTorch** - Added nightly builds with CUDA 12.8 for RTX 50-series
+- **Blackwell-Optimized PyTorch** - PyTorch built for CUDA 12.8 with native RTX 50-series support
 - **Multi-GPU Support** - Mix Blackwell (RTX 5090/5060) with Ada Lovelace (RTX 4090)
 - **Production Testing** - Validated on actual RTX 5090 and RTX 5060 hardware
 - **Enhanced Documentation** - Specific guidance for Blackwell architecture
